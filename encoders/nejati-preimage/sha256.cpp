@@ -1,11 +1,13 @@
 #include "sha256.h"
 
-SHA256::SHA256(int inSize, int rnds, bool initBlock)
-	: MDHash(inSize, 8, rnds, initBlock)
+SHA256::SHA256(int inSize, int rounds, bool initBlock)
+	: MDHash(inSize, 8, rounds, initBlock)
 {
 }
 
 bool debug = false;
+int chunk = 1;
+bool messageexpansion = false;
 
 void SHA256::encode()
 {
@@ -29,23 +31,24 @@ void SHA256::encode()
 	}
 
 	
-for ( int z=0; z < 1; z++) {
+for ( int z=0; z < chunk; z++) {
 	if (debug) {
 	printf("message: %p | chain: %p\n", w[0], chain[0]);
 	printf("message: %x | chain: %x\n", w[0], chain[0]);
-	
 	printf("Expansion...\n");
 	}
 
 	/* Message expansion */
-	for (int i=0; i < 16; i++) {
-		
-		int j = i * 4;
-		// w[i] = uint(p[j])<<24 | uint(p[j+1])<<16 | uint(p[j+2])<<8 | uint(p[j+3]) 
-		
-		
-		
+	if (messageexpansion) {
+	// for (int i=0; i < 16; i++) {
+	// 	int j = i * 4;
+	// 	// w[i] = uint(p[j])<<24 | uint(p[j+1])<<16 | uint(p[j+2])<<8 | uint(p[j+3]);
+	// 	cnf.rotl();
+	// 	cnf.or4(w[i], (w[j]<<24), (w[j+1]<<16), (w[j+2]<<8), (w[j+3]));
+	// }
 	}
+	
+	
 	for( int i=16; i<rounds; i++ )
 	{
 		if (debug) {
