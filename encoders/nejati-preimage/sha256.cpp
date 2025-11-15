@@ -9,35 +9,39 @@ bool debug = false;
 int chunk = 1;
 bool messageexpansion = false;
 
+//####################################
+//needs inputs
 void SHA256::encode()
 {
 	if (debug) {
 	printf("New var init...\n");
 	}
-	for( int i=0; i<rounds; i++ )
-		cnf.newVars(w[i], 32, "w"+to_string(i));
-
-	for( int i=0; i<8; i++ )
+	//mixing values (64 32 bit values)
+	for( int i=0; i<rounds; i++ ){
+		cnf.newVars(w[i], 32, "w_"+to_string(i));
+	}
+	//IV
+	for( int i=0; i<8; i++ ){
 		cnf.newVars(chain[i], 32);
-
-	for( int i=0; i<8; i++ )
-		cnf.newVars(out[i], 32, "hash"+to_string(i));
-
-	
+	}
+	//hash output (8*32 bits - 256 bits)
+	for( int i=0; i<8; i++ ){
+		cnf.newVars(out[i], 32, "hash_"+to_string(i));
+	}
+	//values for a,b,c,d,e,f,g,h in sha256block
 	for( int i=0; i<rounds; i++ )
 	{
 		cnf.newVars(A[i+4], 32);
 		cnf.newVars(E[i+4], 32);
 	}
-
-	
+//##################################################
+//
 for ( int z=0; z < chunk; z++) {
 	if (debug) {
 	printf("message: %p | chain: %p\n", w[0], chain[0]);
 	printf("message: %x | chain: %x\n", w[0], chain[0]);
 	printf("Expansion...\n");
 	}
-
 	/* Message expansion */
 	if (messageexpansion) {
 	// for (int i=0; i < 16; i++) {
@@ -47,8 +51,6 @@ for ( int z=0; z < chunk; z++) {
 	// 	cnf.or4(w[i], (w[j]<<24), (w[j+1]<<16), (w[j+2]<<8), (w[j+3]));
 	// }
 	}
-	
-	
 	for( int i=16; i<rounds; i++ )
 	{
 		if (debug) {
@@ -57,21 +59,17 @@ for ( int z=0; z < chunk; z++) {
 		int s0[32], s1[32];
 		cnf.newVars(s0);
 		cnf.newVars(s1);
-
 		int r1[32], r2[32];
 		cnf.rotr(r1, w[i-15], 7);
 		cnf.rotr(r2, w[i-15], 18);
 		cnf.xor2(s0+29, r1+29, r2+29, 3);
 		cnf.xor3(s0, r1, r2, w[i-15]+3, 29); //shr(w[i-15]+3)
-
 		cnf.rotr(r1, w[i-2], 17);
 		cnf.rotr(r2, w[i-2], 19);
 		cnf.xor2(s1+22, r1+22, r2+22, 10);
 		cnf.xor3(s1, r1, r2, w[i-2]+10, 22); //shr(w[i-2]+10)
-
 		cnf.add4(w[i], w[i-16], s0, w[i-7], s1);
 	}
-
 	/* Round constants */
 	unsigned rnd_const[] = {
 		0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -91,7 +89,6 @@ for ( int z=0; z < chunk; z++) {
 		cnf.newVars(k[i]);
 		cnf.fixedValue(k[i], rnd_const[i]);
 	}
-
 	/* Initialization vector */
 	if ( initialBlock )
 	{
@@ -107,7 +104,6 @@ for ( int z=0; z < chunk; z++) {
 		cnf.fixedValue(chain[6], 0x1f83d9ab);
 		cnf.fixedValue(chain[7], 0x5be0cd19);
 	}
-
 	cnf.assign(A[3], chain[0]);
 	cnf.assign(A[2], chain[1]);
 	cnf.assign(A[1], chain[2]);
@@ -116,7 +112,6 @@ for ( int z=0; z < chunk; z++) {
 	cnf.assign(E[2], chain[5]);
 	cnf.assign(E[1], chain[6]);
 	cnf.assign(E[0], chain[7]);
-
 	/* Main loop */
 	if (debug) {
 	printf("Main start...\n");
@@ -131,26 +126,23 @@ for ( int z=0; z < chunk; z++) {
 		cnf.newVars(sigma1);
 		Sigma0(sigma0, A[i+3]);
 		Sigma1(sigma1, E[i+3]);
-
 		int f1[32], f2[32];
 		cnf.newVars(f1);
 		cnf.newVars(f2);
 		cnf.ch(f1, E[i+3], E[i+2], E[i+1]);
 		cnf.maj3(f2, A[i+3], A[i+2], A[i+1]);
-
 		int T[32];
 		cnf.newVars(T);
 		cnf.add5(T, E[i], sigma1, f1, k[i], w[i]);
-
 		cnf.add2(E[i+4], A[i], T);
-
 		cnf.add3(A[i+4], T, sigma0, f2);
 	}
-	
 }
-
-
-	/* Final addition */
+	//###################################
+	//
+	/* Final addition 
+		IV + abcdefgh values added to output
+	*/
 	if (debug) {
 	printf("Final add\n");
 	}
@@ -162,7 +154,6 @@ for ( int z=0; z < chunk; z++) {
 	cnf.add2(out[5], chain[5], E[rounds+2]);
 	cnf.add2(out[6], chain[6], E[rounds+1]);
 	cnf.add2(out[7], chain[7], E[rounds]);
-
 }
 
 void SHA256::Sigma0(int *z, int *x)

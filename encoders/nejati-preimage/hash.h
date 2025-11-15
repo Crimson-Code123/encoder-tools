@@ -27,7 +27,7 @@ class MDHash {
 
 	Word *w;    /// Message words
 	Word *chain; /// Input chaining value (will be IV for initial block)
-	Word *out;   /// Output chaining value
+	Word *out;   /// Output chaining value (digest)
 
 	Formula cnf;
 };
