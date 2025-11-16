@@ -22,7 +22,7 @@ class MDHash {
 	int rounds;        /// Number of rounds
 	bool initialBlock; /// Whether this is the first MD block
 
-	int inputSize;  /// Number of message words
+	int inputSize;  /// Number of message words (todo: add to arguments)
 	int outputSize; /// Number of output words
 
 	Word *w;    /// Message words

@@ -135,6 +135,11 @@ void sha1_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 
 
 
+
+
+
+
+
 void sha256_comp(unsigned *w, unsigned *H, int rounds, bool chaining)
 {
 	/*Note 1: All variables are 32 bit unsigned integers and addition is calculated modulo 232
@@ -241,7 +246,6 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 	H[5] = 0x9b05688c;
 	H[6] = 0x1f83d9ab;
 	H[7] = 0x5be0cd19;
-
 	/*Initialize array of round constants:
 	  (first 32 bits of the fractional parts of the cube roots of the first 64 primes 2..311):*/
 	unsigned k[] = {
@@ -253,7 +257,6 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 		0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
 		0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
 		0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 };
-
 	/*Pre-processing:
 	  append the bit '1' to the message
 	  append k bits '0', where k is the minimum number >= 0 such that the resulting message
@@ -261,7 +264,6 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 	  append length of message (without the '1' bit or padding), in bits, as 64-bit big-endian integer
 	  (this will make the entire post-processed length a multiple of 512 bits) */
 	unsigned long long ml = size * 8;
-
 	int i = size;
 	vector<unsigned char> M(m, m+size);
 	M.push_back(0x80);
@@ -275,9 +277,7 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 	M.push_back((ml >> 8) & 0xFF);
 	M.push_back((ml) & 0xFF);
 	size = M.size();
-
 	unsigned w[64]; //
-
 	/* Process the message in successive 512-bit chunks:
 	   break message into 512-bit chunks */
 	for( int chunk=0; chunk<size; chunk+=64 )
@@ -285,6 +285,7 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 		/*    create a 64-entry message schedule array w[0..63] of 32-bit words
 			  (The initial values in w[0..63] don't matter, so many implementations zero them here)
 			  copy chunk into first 16 words w[0..15] of the message schedule array*/
+		//
 		for( int i=0; i<16; i++ ) {
 			w[i] = 0;
 			for( int j=0; j<4; j++ ) {
@@ -297,6 +298,30 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 		hash[i] = H[i];
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

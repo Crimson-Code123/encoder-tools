@@ -1,6 +1,6 @@
 SRCS = formula.cpp util.cpp hash.cpp sha1.cpp sha256.cpp md4.cpp
 OBJS = $(SRCS:.cpp=.o)
-TARGET = nejati_preimage_encoder
+TARGET = encoder
 CFLAGS = -std=c++11 -O2
 MACROS = #-D_DOTMATRIX_ #-D_COMPRESSOR_TEST
 

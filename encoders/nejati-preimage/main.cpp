@@ -27,19 +27,19 @@ int cfg_use_xor_clauses;
 Formula::MultiAdderType cfg_multi_adder_type;
 int cfg_rand_target;
 int cfg_print_target;
-char cfg_target[32];
+// char cfg_target[32]; //
+char* cfg_target;
+int randTargetBits = 32;
 FuncType cfg_function;
 AnalysisType cfg_analysis;
 int fixed_bits;
 int dobbertin;
-int bits; // Dobbertin-like containts: Number of bits to relax
+int bits; // Dobbertin-like constraints: Number of bits to relax
 int sha256Input = 8;
-
 
 void preimage(int rounds)
 {
 	MDHash* f;
-
 	if (cfg_function == FT_SHA1)
 		f = new SHA1(rounds);
 	else if (cfg_function == FT_SHA256)
@@ -50,26 +50,30 @@ void preimage(int rounds)
 		fprintf(stderr, "Invalid function type!\n");
 		return;
 	}
-
 	if (cfg_use_xor_clauses)
 		f->cnf.setUseXORClauses();
 	if (cfg_multi_adder_type != Formula::MAT_NONE)
 		f->cnf.setMultiAdderType(cfg_multi_adder_type);
-
+	for (int chunk = 0; chunk < 0; chunk += 64) {
+		for ( int i=0; i < 16; i++) {
+			
+		}
+		f->encode();
+	}
 	f->encode();
-
 	unsigned w[rounds];  //decouple
 	unsigned hash[f->outputSize];
-
 	if (cfg_rand_target) {
 		/* Generate a random pair of input/target */
-		for (int i = 0; i < f->inputSize; i++)
+		//todo: get from stdin
+		for (int i = 0; i < f->inputSize; i++){
 			w[i] = lrand48();
-
+			w[i] = 1;
+		}
 		if (cfg_function == FT_SHA1)
 			sha1_comp(w, hash, rounds);
 		else if (cfg_function == FT_SHA256)
-
+			// sha256_msg("123", 512, hash, rounds)
 			sha256_comp(w, hash, rounds);
 		else if (cfg_function == FT_MD4)
 			md4_comp(w, hash, rounds);
@@ -83,23 +87,20 @@ void preimage(int rounds)
 			return;
 		}
 	} else {
-		for (int i = 0; i < f->outputSize; i++)
+		for (int i = 0; i < f->outputSize; i++){
 			sscanf(cfg_target, "%08x", &hash[i]);
+		}
 	}
-
 	/* Set hash target bits */
 	f->fixOutput(hash);
-
 	/* Fix input bits (if asked) */
 	for (int i = 0; i < fixed_bits; i++) {
 		int r = i / 32;
 		int c = i % 32;
 		f->cnf.fixedValue(&(f->w[r][c]), (w[r] >> c) & 1, 1);
 	}
-
 	/* Printing out the instance */
 	f->cnf.dimacs();
-
 	delete f;
 }
 
@@ -109,32 +110,36 @@ void display_usage()
 		   "  --help or -h                             Prints this message\n"
 		   "  --xor                                    Use XOR clauses (default: off)\n"
 		   "  --adder_type or -A {two_operand | counter_chain | espresso | dot_matrix}\n"
-		   "                                           Specifies the type of multi operand addition encoding (default: espresso)\n"
+		   "                                           Specifies the type of multi operand addition encoding (default: two operand)\n"
 		   "  --target or -t {random | stdin}          Hash target (default: random)\n"
 		   "                                           random: Generates a random input/target pair\n"
 		   "                                           stdin: Reads the target from stdin (space separated hex values)\n"
 		   "  --rounds or -r {int(16..80)}             Number of rounds in your function\n"
-		   "  --function or -f {md4 | sha1 | sha256}   Type of function under analysis (default: sha1)\n"
+		   "  --function or -f {md4 | sha1 | sha256}   Type of function under analysis (default: sha256)\n"
 		   "  --analysis or -a {preimage | collision}  Type of analysis (default: preimage)\n"
 		   "  --print_target                           Prints the randomly generated message/target and exits (--target should be set to random mode)\n"
 		   "  --fix or -F {int(0..512)}                Fixes the given number (k) of input bits (in the range 0..(k-1)) (default: 0)\n");
 }
+/*
+target - 00000000000000000000007179565665757ca89c84456ec0c16bb7eb8771f21c
+todo: Inputs should be fixed (quantity should be input block minus random target)
 
+./encoder -t 00000000000000000000007179565665757ca89c84456ec0c16bb7eb8771f21c --print_target
+ -r 64 -A two_operand -f sha256 -a preimage -F (size of btc inputs{merkle root, time, addr, etc} minus rand1)
+*/
 int main(int argc, char** argv)
 {
 	unsigned long seed = time(NULL);
-
 	/* Arguments default values */
 	cfg_use_xor_clauses = 0;
 	cfg_multi_adder_type = Formula::MAT_NONE;
-	cfg_rand_target = 1;
+	cfg_rand_target = 0;
 	cfg_print_target = 1;
 	cfg_function = FT_SHA256;
 	cfg_analysis = AT_PREIMAGE;
 	int rounds = 64; //-1 default
 	fixed_bits = 0;
-	bits = 32; 
-
+	bits = 32;
 	struct option long_options[] = {
 		/* flag options */
 		{ "xor", no_argument, &cfg_use_xor_clauses, 1 },
@@ -151,13 +156,11 @@ int main(int argc, char** argv)
 		{ "help", no_argument, 0, 'h' },
 		{ 0, 0, 0, 0 }
 	};
-
 	/* Process command line */
 	int c, option_index;
 	while ((c = getopt_long(argc, argv, "a:r:f:F:A:t:h", long_options, &option_index)) != -1) {
 		switch (c) {
 		case 0:
-			/* If this option set a flag, do nothing else now. */
 			if (long_options[option_index].flag != 0)
 				break;
 			printf("option %s", long_options[option_index].name);
@@ -165,15 +168,12 @@ int main(int argc, char** argv)
 				printf(" with arg %s", optarg);
 			printf("\n");
 			break;
-
 		case 'r':
 			rounds = atoi(optarg);
 			break;
-
 		case 'b':
 			bits = atoi(optarg);
 			break;
-
 		case 'F':
 			fixed_bits = atoi(optarg);
 			if (fixed_bits < 0 || fixed_bits > 512) {
@@ -181,7 +181,6 @@ int main(int argc, char** argv)
 				return 1;
 			}
 			break;
-
 		case 'a':
 			cfg_analysis = strcmp(optarg, "preimage") == 0 ? AT_PREIMAGE : strcmp(optarg, "collision") == 0 ? AT_COLLISION
 																											: AT_NONE;
@@ -190,7 +189,6 @@ int main(int argc, char** argv)
 				return 1;
 			}
 			break;
-
 		case 'f':
 			cfg_function = strcmp(optarg, "sha1") == 0 ? FT_SHA1 : strcmp(optarg, "sha256") == 0 ? FT_SHA256
 				: strcmp(optarg, "md4") == 0                                                     ? FT_MD4
@@ -200,7 +198,6 @@ int main(int argc, char** argv)
 				return 1;
 			}
 			break;
-
 		case 'A':
 			cfg_multi_adder_type = strcmp(optarg, "two_operand") == 0 ? Formula::TWO_OPERAND : strcmp(optarg, "counter_chain") == 0 ? Formula::COUNTER_CHAIN
 				: strcmp(optarg, "espresso") == 0                                                                                   ? Formula::ESPRESSO
@@ -211,23 +208,20 @@ int main(int argc, char** argv)
 				return 1;
 			}
 			break;
-
 		case 't':
 			cfg_rand_target = strcmp(optarg, "random") == 0 ? 1 : 0;
 			if (!cfg_rand_target) {
-				if (strlen(optarg) == 32) {
+				if (strlen(optarg) == randTargetBits) {
 					strcpy(cfg_target, optarg);
 				} else {
-					fprintf(stderr, "Invalid target - it should be exactly 32 characters long");
+					fprintf(stderr, "Invalid target - it should be exactly %d characters long\n", randTargetBits);
 					return 1;
 				}
 			}
 			break;
-
 		case 'h':
 			display_usage();
 			return 1;
-
 		case '?':
 			/*                if (optopt == 'r')
 								  fprintf (stderr, "Please specify the number of rounds with -r.\n");
@@ -238,25 +232,20 @@ int main(int argc, char** argv)
 										  "Unknown option character `\\x%x'.\n",
 										  optopt);*/
 			return 1;
-
 		default:
 			abort();
 		}
 	}
-
 	if (rounds == -1) {
 		fprintf(stderr, "Number of rounds is required! Use -r or --rounds\n");
 		return 1;
 	}
-
 	srand(seed);
 	srand48(rand());
-
 	if (cfg_analysis == AT_PREIMAGE)
 		preimage(rounds);
 	else {
 		printf("Not supported yet!\n");
 	}
-
 	return 0;
 }
