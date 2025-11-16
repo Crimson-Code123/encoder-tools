@@ -16,13 +16,16 @@ void SHA256::encode()
 	if (debug) {
 	printf("New var init...\n");
 	}
+	for (int i=0; i<inputSize; i++) {
+		cnf.newVars(in[i], 32, "input_"+to_string(i));
+	}
 	//mixing values (64 32 bit values)
 	for( int i=0; i<rounds; i++ ){
 		cnf.newVars(w[i], 32, "w_"+to_string(i));
 	}
 	//IV
 	for( int i=0; i<8; i++ ){
-		cnf.newVars(chain[i], 32);
+		cnf.newVars(chain[i], 32, "chain_"+to_string(i));
 	}
 	//hash output (8*32 bits - 256 bits)
 	for( int i=0; i<8; i++ ){
@@ -46,9 +49,10 @@ for ( int z=0; z < chunk; z++) {
 	if (messageexpansion) {
 	for (int i=0; i < 16; i++) {
 		int j = i * 4;
-	// 	// w[i] = uint(p[j])<<24 | uint(p[j+1])<<16 | uint(p[j+2])<<8 | uint(p[j+3]);
+	//  w[i] = uint(p[j])<<24 | uint(p[j+1])<<16 | uint(p[j+2])<<8 | uint(p[j+3]);
 	// 	cnf.rotl();
 	// 	cnf.or4(w[i], (w[j]<<24), (w[j+1]<<16), (w[j+2]<<8), (w[j+3]));
+		
 	}
 	}
 	for( int i=16; i<rounds; i++ )

@@ -50,19 +50,20 @@ void preimage(int rounds)
 		fprintf(stderr, "Invalid function type!\n");
 		return;
 	}
+	unsigned w[rounds];  //decouple
+	unsigned hash[f->outputSize];
 	if (cfg_use_xor_clauses)
 		f->cnf.setUseXORClauses();
 	if (cfg_multi_adder_type != Formula::MAT_NONE)
 		f->cnf.setMultiAdderType(cfg_multi_adder_type);
 	for (int chunk = 0; chunk < 0; chunk += 64) {
 		for ( int i=0; i < 16; i++) {
-			
+			int j = i*4;
+			w[i] = (w[i] << 8) | cfg_target[chunk+j];
 		}
-		f->encode();
+		// f->encode();
 	}
 	f->encode();
-	unsigned w[rounds];  //decouple
-	unsigned hash[f->outputSize];
 	if (cfg_rand_target) {
 		/* Generate a random pair of input/target */
 		//todo: get from stdin
@@ -133,8 +134,8 @@ int main(int argc, char** argv)
 	/* Arguments default values */
 	cfg_use_xor_clauses = 0;
 	cfg_multi_adder_type = Formula::MAT_NONE;
-	cfg_rand_target = 0;
-	cfg_print_target = 1;
+	cfg_rand_target = 1;
+	cfg_print_target = 0;
 	cfg_function = FT_SHA256;
 	cfg_analysis = AT_PREIMAGE;
 	int rounds = 64; //-1 default

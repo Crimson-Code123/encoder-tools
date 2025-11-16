@@ -18,6 +18,7 @@ class MDHash {
 
 	virtual void encode();
 	void fixOutput(unsigned *target);
+	void fixInput(unsigned *value);
 
 	int rounds;        /// Number of rounds
 	bool initialBlock; /// Whether this is the first MD block
@@ -28,6 +29,7 @@ class MDHash {
 	Word *w;    /// Message words
 	Word *chain; /// Input chaining value (will be IV for initial block)
 	Word *out;   /// Output chaining value (digest)
+	Word *in; //
 
 	Formula cnf;
 };
