@@ -29,13 +29,13 @@ int cfg_rand_target;
 int cfg_print_target;
 // char cfg_target[32]; //
 char* cfg_target;
-int randTargetBits = 32;
 FuncType cfg_function;
 AnalysisType cfg_analysis;
 int fixed_bits;
 int dobbertin;
 int bits; // Dobbertin-like constraints: Number of bits to relax
 int sha256Input = 8;
+int randTargetBits = 32;
 
 void preimage(int rounds)
 {
@@ -85,7 +85,7 @@ void preimage(int rounds)
 			for (int i = 0; i < f->outputSize; i++)
 				printf("%08x ", hash[i]);
 			printf("\n");
-			return;
+			// return;
 		}
 	} else {
 		for (int i = 0; i < f->outputSize; i++){
@@ -128,6 +128,7 @@ todo: Inputs should be fixed (quantity should be input block minus random target
 ./encoder -t 00000000000000000000007179565665757ca89c84456ec0c16bb7eb8771f21c --print_target
  -r 64 -A two_operand -f sha256 -a preimage -F (size of btc inputs{merkle root, time, addr, etc} minus rand1)
 */
+
 int main(int argc, char** argv)
 {
 	unsigned long seed = time(NULL);

@@ -5,6 +5,7 @@
 
 class SHA256 : public MDHash {
 	public:
+		//insize: variable
 		SHA256(int inSize = 8, int rnds = 64, bool initBlock = true);
 
 		void encode();
