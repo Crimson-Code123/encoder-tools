@@ -5,32 +5,38 @@ SHA256::SHA256(int inSize, int rounds, bool initBlock)
 {
 }
 
-bool debug = false;
-int chunk = 1;
+bool debug = true;
+// int chunk = 1;
 bool messageexpansion = true;
 
 //####################################
 //needs inputs
 void SHA256::encode()
 {
+	//moved to main.cpp
 	if (debug) {
 		printf("New var init...\n");
 	}
-	for (int i=0; i<inputSize; i++) {
-		cnf.newVars(in[i], 32, "input_"+to_string(i));
-	}
+	// for (int i=0; i<inputSize; i++) {
+	// 	cnf.newVars(in[i], 32, "input_"+to_string(i));
+	// }
 	//mixing values (64 32 bit values)
+
 	for( int i=0; i<rounds; i++ ){
 		cnf.newVars(w[i], 32, "w_"+to_string(i));
 	}
+	
+	printf("\n");
 	//IV
 	for( int i=0; i<8; i++ ){
 		cnf.newVars(chain[i], 32, "chain_"+to_string(i));
 	}
+	printf("\n");
 	//hash output (8*32 bits - 256 bits)
 	for( int i=0; i<8; i++ ){
 		cnf.newVars(out[i], 32, "hash_"+to_string(i));
 	}
+	printf("\n");
 	//values for a,b,c,d,e,f,g,h in sha256block
 	for( int i=0; i<rounds; i++ ){
 		cnf.newVars(A[i+4], 32);
@@ -38,20 +44,20 @@ void SHA256::encode()
 	}
 	//##################################################
 	//
-	for ( int z=0; z < chunk; z++) {
+	for ( int z=0; z < 1; z++) {
 		if (debug) {
-			printf("message: %p | chain: %p\n", w[0], chain[0]);
-			printf("message: %x | chain: %x\n", w[0], chain[0]);
+			// printf("message: %p | chain: %p\n", w[0], chain[0]);
+			// printf("message: %x | chain: %x\n", w[0], chain[0]);
 			printf("Expansion...\n");
 		}
 		/* Message expansion */
 		if (messageexpansion) {
-			for (int i=0; i < 16; i++) {
-				int j = i * 4;
-				//  w[i] = uint(p[j])<<24 | uint(p[j+1])<<16 | uint(p[j+2])<<8 | uint(p[j+3]);
-				// 	cnf.rotl();
-				// 	cnf.or4(w[i], (w[j]<<24), (w[j+1]<<16), (w[j+2]<<8), (w[j+3]));
-			}
+			// for (int i=0; i < 16; i++) {
+			// 	int j = i * 4;
+			// 	//  w[i] = uint(p[j])<<24 | uint(p[j+1])<<16 | uint(p[j+2])<<8 | uint(p[j+3]);
+			// 	// 	cnf.rotl();
+			// 	// 	cnf.or4(w[i], (w[j]<<24), (w[j+1]<<16), (w[j+2]<<8), (w[j+3]));
+			// }
 		}
 		for( int i=16; i<rounds; i++ ) {
 			if (debug) {

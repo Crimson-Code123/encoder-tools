@@ -15,7 +15,7 @@ Formula::Formula(string name)
     useXORClauses = false;
     pbMethod = SEQUENTIAL_COUNTER;
     adderType = RIPPLE_CARRY;
-    multiAdderType = ESPRESSO;
+    multiAdderType = TWO_OPERAND;
     formulaName = name;
 }
 
@@ -30,11 +30,12 @@ void Formula::varName(int* x, string name, int offset)
 
 void Formula::newVars(int* x, int n, string name)
 {
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < n; i++){
         x[i] = ++varID;
-
-    if (name != "")
+    }
+    if (name != ""){
         varNames[name + "_" + formulaName] = x[0];
+    }
     varCnt += n;
 }
 

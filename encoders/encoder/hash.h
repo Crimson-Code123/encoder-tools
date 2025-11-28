@@ -26,6 +26,11 @@ class MDHash {
 	int inputSize;  /// Number of message words (todo: add to arguments)
 	int outputSize; /// Number of output words
 
+
+	int A[70][32];
+	int E[70][32];
+	
+
 	Word *w;    /// Message words
 	Word *chain; /// Input chaining value (will be IV for initial block)
 	Word *out;   /// Output chaining value (digest)

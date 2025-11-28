@@ -10,8 +10,9 @@ class SHA256 : public MDHash {
 
 		void encode();
 
-		int A[70][32];
-		int E[70][32];
+		//moved to hash.h
+		// int A[70][32];
+		// int E[70][32];
 
 		void Sigma0(int *z, int *x);
 		void Sigma1(int *z, int *x);

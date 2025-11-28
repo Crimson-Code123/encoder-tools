@@ -35,7 +35,7 @@ int fixed_bits;
 int dobbertin;
 int bits; // Dobbertin-like constraints: Number of bits to relax
 int sha256Input = 8;
-int randTargetBits = 32;
+int randTargetBits = 32; //
 
 void preimage(int rounds)
 {
@@ -50,26 +50,54 @@ void preimage(int rounds)
 		fprintf(stderr, "Invalid function type!\n");
 		return;
 	}
+
+
+	f->encode();
+
 	unsigned w[rounds];  //decouple
 	unsigned hash[f->outputSize];
+	
 	if (cfg_use_xor_clauses)
 		f->cnf.setUseXORClauses();
 	if (cfg_multi_adder_type != Formula::MAT_NONE)
 		f->cnf.setMultiAdderType(cfg_multi_adder_type);
-	for (int chunk = 0; chunk < 0; chunk += 64) {
-		for ( int i=0; i < 16; i++) {
-			int j = i*4;
-			w[i] = (w[i] << 8) | cfg_target[chunk+j];
-		}
-		// f->encode();
-	}
-	f->encode();
+	// for (int chunk = 0; chunk < 0; chunk += 64) {
+	// 	for ( int i=0; i < 16; i++) {
+	// 		int j = i*4;
+	// 		w[i] = (w[i] << 8) | cfg_target[chunk+j];
+	// 	}
+	// 	// f->encode();
+	// }
+	printf("\n");
+	//todo: move var init to main
+	// for (int i=0; i<f->inputSize; i++) {
+	// 	f->cnf.newVars(f->in[i], 32, "input_"+to_string(i));
+	// }
+	// //mixing values (64 32 bit values)
+	// for( int i=0; i<rounds; i++ ){
+	// 	f->cnf.newVars(f->w[i], 32, "w_"+to_string(i));
+	// }
+	// //IV
+	// for( int i=0; i<8; i++ ){
+	// 	f->cnf.newVars(f->chain[i], 32, "chain_"+to_string(i));
+	// }
+	// //hash output (8*32 bits - 256 bits)
+	// for( int i=0; i<8; i++ ){
+	// 	f->cnf.newVars(f->out[i], 32, "hash_"+to_string(i));
+	// }
+	// //values for a,b,c,d,e,f,g,h in sha256block
+	// for( int i=0; i<rounds; i++ ){
+	// 	f->cnf.newVars(f->A[i+4], 32);
+	// 	f->cnf.newVars(f->E[i+4], 32);
+	// }
+	printf("\n");
+	printf("\n");
 	if (cfg_rand_target) {
 		/* Generate a random pair of input/target */
 		//todo: get from stdin
 		for (int i = 0; i < f->inputSize; i++){
 			w[i] = lrand48();
-			w[i] = 1;
+			// w[i] = 1;
 		}
 		if (cfg_function == FT_SHA1)
 			sha1_comp(w, hash, rounds);
@@ -92,6 +120,7 @@ void preimage(int rounds)
 			sscanf(cfg_target, "%08x", &hash[i]);
 		}
 	}
+	printf("\n");
 	/* Set hash target bits */
 	f->fixOutput(hash);
 	/* Fix input bits (if asked) */
