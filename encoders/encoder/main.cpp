@@ -158,125 +158,156 @@ todo: Inputs should be fixed (quantity should be input block minus random target
  -r 64 -A two_operand -f sha256 -a preimage -F (size of btc inputs{merkle root, time, addr, etc} minus rand1)
 */
 
-int main(int argc, char** argv)
-{
-	unsigned long seed = time(NULL);
-	/* Arguments default values */
-	cfg_use_xor_clauses = 0;
-	cfg_multi_adder_type = Formula::MAT_NONE;
-	cfg_rand_target = 1;
-	cfg_print_target = 0;
-	cfg_function = FT_SHA256;
-	cfg_analysis = AT_PREIMAGE;
-	int rounds = 64; //-1 default
-	fixed_bits = 0;
-	bits = 32;
-	struct option long_options[] = {
-		/* flag options */
-		{ "xor", no_argument, &cfg_use_xor_clauses, 1 },
-		{ "print_target", no_argument, &cfg_print_target, 1 },
-		{ "dobbertin", no_argument, &dobbertin, 1 },
-		/* valued options */
-		{ "bits", required_argument, 0, 'b' },
-		{ "rounds", required_argument, 0, 'r' },
-		{ "fix", required_argument, 0, 'F' },
-		{ "function", required_argument, 0, 'f' },
-		{ "analysis", required_argument, 0, 'a' },
-		{ "adder_type", required_argument, 0, 'A' },
-		{ "target", required_argument, 0, 't' },
-		{ "help", no_argument, 0, 'h' },
-		{ 0, 0, 0, 0 }
-	};
-	/* Process command line */
-	int c, option_index;
-	while ((c = getopt_long(argc, argv, "a:r:f:F:A:t:h", long_options, &option_index)) != -1) {
-		switch (c) {
-		case 0:
-			if (long_options[option_index].flag != 0)
-				break;
-			printf("option %s", long_options[option_index].name);
-			if (optarg)
-				printf(" with arg %s", optarg);
-			printf("\n");
-			break;
-		case 'r':
-			rounds = atoi(optarg);
-			break;
-		case 'b':
-			bits = atoi(optarg);
-			break;
-		case 'F':
-			fixed_bits = atoi(optarg);
-			if (fixed_bits < 0 || fixed_bits > 512) {
-				fprintf(stderr, "Inavlid number of input bits to fix\n");
-				return 1;
-			}
-			break;
-		case 'a':
-			cfg_analysis = strcmp(optarg, "preimage") == 0 ? AT_PREIMAGE : strcmp(optarg, "collision") == 0 ? AT_COLLISION
-																											: AT_NONE;
-			if (cfg_analysis == AT_NONE) {
-				fprintf(stderr, "Invalid or missing analysis type!\nUse -a or --analysis\n");
-				return 1;
-			}
-			break;
-		case 'f':
-			cfg_function = strcmp(optarg, "sha1") == 0 ? FT_SHA1 : strcmp(optarg, "sha256") == 0 ? FT_SHA256
-				: strcmp(optarg, "md4") == 0                                                     ? FT_MD4
-																								 : FT_NONE;
-			if (cfg_function == FT_NONE) {
-				fprintf(stderr, "Invalid or missing function type!\nUse -f or --function\n");
-				return 1;
-			}
-			break;
-		case 'A':
-			cfg_multi_adder_type = strcmp(optarg, "two_operand") == 0 ? Formula::TWO_OPERAND : strcmp(optarg, "counter_chain") == 0 ? Formula::COUNTER_CHAIN
-				: strcmp(optarg, "espresso") == 0                                                                                   ? Formula::ESPRESSO
-				: strcmp(optarg, "dot_matrix") == 0                                                                                 ? Formula::DOT_MATRIX
-																																	: Formula::MAT_NONE;
-			if (cfg_multi_adder_type == Formula::MAT_NONE) {
-				fprintf(stderr, "Invalid or missing multi-adder type!\nUse -h to see the optionsi\n");
-				return 1;
-			}
-			break;
-		case 't':
-			cfg_rand_target = strcmp(optarg, "random") == 0 ? 1 : 0;
-			if (!cfg_rand_target) {
-				if (strlen(optarg) == randTargetBits) {
-					strcpy(cfg_target, optarg);
-				} else {
-					fprintf(stderr, "Invalid target - it should be exactly %d characters long\n", randTargetBits);
-					return 1;
-				}
-			}
-			break;
-		case 'h':
-			display_usage();
-			return 1;
-		case '?':
-			/*                if (optopt == 'r')
-								  fprintf (stderr, "Please specify the number of rounds with -r.\n");
-							  else if (isprint (optopt))
-								  fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-							  else
-								  fprintf (stderr,
-										  "Unknown option character `\\x%x'.\n",
-										  optopt);*/
-			return 1;
-		default:
-			abort();
-		}
-	}
-	if (rounds == -1) {
-		fprintf(stderr, "Number of rounds is required! Use -r or --rounds\n");
-		return 1;
-	}
-	srand(seed);
-	srand48(rand());
-	if (cfg_analysis == AT_PREIMAGE)
-		preimage(rounds);
-	else {
-		printf("Not supported yet!\n");
-	}
-	return 0;
+
+int main(int argc, char** argv) {
+
+	// Formula* f;
+	// Word *t4;
+	// Word *t5;
+	// Word *t6;
+
+	// printf("\n\n");
+	// // MDHash* f;
+	// int t1[32];
+	// int t2[32];
+	// int t3[32];
+
+	// f->newVars2({t1}, 32);
+	// f->newVars2({t2}, 32);
+	// f->newVars(t3, 32);
+	// printf("\n\n");
+	// f->fixedValue(t1, 213, 32);
+	// f->fixedValue(t2, 111, 32);
+	// f->fixedValue(t3, 222, 32);
+	// f->add2(t1, t2, t3, 32);
+	// f->xor2(t1, t2, t3, 32);
+
+	// printf("%d\n", t1);
+	// f->rotr(t1, t2, 2, 32);
+
+	// printf("%d\n", t1);
+	// f->dimacs("out.dimacs");
 }
+
+// int main(int argc, char** argv)
+// {
+// 	unsigned long seed = time(NULL);
+// 	/* Arguments default values */
+// 	cfg_use_xor_clauses = 0;
+// 	cfg_multi_adder_type = Formula::MAT_NONE;
+// 	cfg_rand_target = 1;
+// 	cfg_print_target = 0;
+// 	cfg_function = FT_SHA256;
+// 	cfg_analysis = AT_PREIMAGE;
+// 	int rounds = 64; //-1 default
+// 	fixed_bits = 0;
+// 	bits = 32;
+// 	struct option long_options[] = {
+// 		/* flag options */
+// 		{ "xor", no_argument, &cfg_use_xor_clauses, 1 },
+// 		{ "print_target", no_argument, &cfg_print_target, 1 },
+// 		{ "dobbertin", no_argument, &dobbertin, 1 },
+// 		/* valued options */
+// 		{ "bits", required_argument, 0, 'b' },
+// 		{ "rounds", required_argument, 0, 'r' },
+// 		{ "fix", required_argument, 0, 'F' },
+// 		{ "function", required_argument, 0, 'f' },
+// 		{ "analysis", required_argument, 0, 'a' },
+// 		{ "adder_type", required_argument, 0, 'A' },
+// 		{ "target", required_argument, 0, 't' },
+// 		{ "help", no_argument, 0, 'h' },
+// 		{ 0, 0, 0, 0 }
+// 	};
+// 	/* Process command line */
+// 	int c, option_index;
+// 	while ((c = getopt_long(argc, argv, "a:r:f:F:A:t:h", long_options, &option_index)) != -1) {
+// 		switch (c) {
+// 		case 0:
+// 			if (long_options[option_index].flag != 0)
+// 				break;
+// 			printf("option %s", long_options[option_index].name);
+// 			if (optarg)
+// 				printf(" with arg %s", optarg);
+// 			printf("\n");
+// 			break;
+// 		case 'r':
+// 			rounds = atoi(optarg);
+// 			break;
+// 		case 'b':
+// 			bits = atoi(optarg);
+// 			break;
+// 		case 'F':
+// 			fixed_bits = atoi(optarg);
+// 			if (fixed_bits < 0 || fixed_bits > 512) {
+// 				fprintf(stderr, "Inavlid number of input bits to fix\n");
+// 				return 1;
+// 			}
+// 			break;
+// 		case 'a':
+// 			cfg_analysis = strcmp(optarg, "preimage") == 0 ? AT_PREIMAGE : strcmp(optarg, "collision") == 0 ? AT_COLLISION
+// 																											: AT_NONE;
+// 			if (cfg_analysis == AT_NONE) {
+// 				fprintf(stderr, "Invalid or missing analysis type!\nUse -a or --analysis\n");
+// 				return 1;
+// 			}
+// 			break;
+// 		case 'f':
+// 			cfg_function = strcmp(optarg, "sha1") == 0 ? FT_SHA1 : strcmp(optarg, "sha256") == 0 ? FT_SHA256
+// 				: strcmp(optarg, "md4") == 0                                                     ? FT_MD4
+// 																								 : FT_NONE;
+// 			if (cfg_function == FT_NONE) {
+// 				fprintf(stderr, "Invalid or missing function type!\nUse -f or --function\n");
+// 				return 1;
+// 			}
+// 			break;
+// 		case 'A':
+// 			cfg_multi_adder_type = strcmp(optarg, "two_operand") == 0 ? Formula::TWO_OPERAND : strcmp(optarg, "counter_chain") == 0 ? Formula::COUNTER_CHAIN
+// 				: strcmp(optarg, "espresso") == 0                                                                                   ? Formula::ESPRESSO
+// 				: strcmp(optarg, "dot_matrix") == 0                                                                                 ? Formula::DOT_MATRIX
+// 																																	: Formula::MAT_NONE;
+// 			if (cfg_multi_adder_type == Formula::MAT_NONE) {
+// 				fprintf(stderr, "Invalid or missing multi-adder type!\nUse -h to see the optionsi\n");
+// 				return 1;
+// 			}
+// 			break;
+// 		case 't':
+// 			cfg_rand_target = strcmp(optarg, "random") == 0 ? 1 : 0;
+// 			if (!cfg_rand_target) {
+// 				if (strlen(optarg) == randTargetBits) {
+// 					strcpy(cfg_target, optarg);
+// 				} else {
+// 					fprintf(stderr, "Invalid target - it should be exactly %d characters long\n", randTargetBits);
+// 					return 1;
+// 				}
+// 			}
+// 			break;
+// 		case 'h':
+// 			display_usage();
+// 			return 1;
+// 		case '?':
+// 			/*                if (optopt == 'r')
+// 								  fprintf (stderr, "Please specify the number of rounds with -r.\n");
+// 							  else if (isprint (optopt))
+// 								  fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+// 							  else
+// 								  fprintf (stderr,
+// 										  "Unknown option character `\\x%x'.\n",
+// 										  optopt);*/
+// 			return 1;
+// 		default:
+// 			abort();
+// 		}
+// 	}
+// 	if (rounds == -1) {
+// 		fprintf(stderr, "Number of rounds is required! Use -r or --rounds\n");
+// 		return 1;
+// 	}
+// 	srand(seed);
+// 	srand48(rand());
+// 	if (cfg_analysis == AT_PREIMAGE)
+// 		preimage(rounds);
+// 	else {
+// 		printf("Not supported yet!\n");
+// 	}
+// 	return 0;
+// }

@@ -25,16 +25,19 @@ Formula::~Formula()
 void Formula::newVars(int* x, int n, string name)
 {
 	for (int i = 0; i < n; i++) {
+		printf("x\n");
+
 		x[i] = ++varID;
-		if (debug) {
-		printf("Newvar: varid: %d | x: %d | x[i]: %d \n", varID, *x, x[i]);
-		}
+		printf("x\n");
+		// if (debug) {
+		// printf("Newvar: varid: %d | x: %d | x[i]: %d \n", varID, *x, x[i]);
+		// }
 	}
 	if (name != "") {
 		varNames[name] = x[0];
-		if (debug) {
-		printf("Varname: %s\n", name.c_str());
-		}
+		// if (debug) {
+		// printf("Varname: %s\n", name.c_str());
+		// }
 	}
 	varCnt += n;
 }

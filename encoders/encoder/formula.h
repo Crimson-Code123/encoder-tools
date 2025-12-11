@@ -28,6 +28,7 @@ public:
 	Formula(string name = "");
 	virtual ~Formula();
 
+	void newVars2(int x, int n = 32, string name = "");
 	void newVars(int* x, int n = 32, string name = ""); // Reserves new variable IDs for the bitvector 'x' of size 'n'
 
 	void addClause(vector<int> v);
