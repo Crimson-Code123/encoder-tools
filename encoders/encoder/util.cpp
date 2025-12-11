@@ -268,6 +268,7 @@ void sha256_msg(unsigned char* m, int size, unsigned *hash, int rounds)
 	vector<unsigned char> M(m, m+size);
 	M.push_back(0x80);
 	while( M.size() % 64 != 56 ) M.push_back(0x00);
+	//big endian
 	M.push_back((ml >> 56) & 0xFF);
 	M.push_back((ml >> 48) & 0xFF);
 	M.push_back((ml >> 40) & 0xFF);
