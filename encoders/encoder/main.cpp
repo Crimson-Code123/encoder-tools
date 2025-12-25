@@ -150,6 +150,7 @@ void display_usage()
 		   "  --print_target                           Prints the randomly generated message/target and exits (--target should be set to random mode)\n"
 		   "  --fix or -F {int(0..512)}                Fixes the given number (k) of input bits (in the range 0..(k-1)) (default: 0)\n");
 }
+
 /*
 target - 00000000000000000000007179565665757ca89c84456ec0c16bb7eb8771f21c
 todo: Inputs should be fixed (quantity should be input block minus random target)
@@ -158,35 +159,49 @@ todo: Inputs should be fixed (quantity should be input block minus random target
  -r 64 -A two_operand -f sha256 -a preimage -F (size of btc inputs{merkle root, time, addr, etc} minus rand1)
 */
 
-
 int main(int argc, char** argv) {
+	unsigned long seed = time(NULL);
+	/* Arguments default values */
+	cfg_use_xor_clauses = 0;
+	cfg_multi_adder_type = Formula::MAT_NONE;
+	cfg_rand_target = 1;
+	cfg_print_target = 0;
+	cfg_function = FT_SHA256;
+	cfg_analysis = AT_PREIMAGE;
+	int rounds = 64; //-1 default
+	fixed_bits = 0;
+	bits = 32;
 
 	// Formula* f;
+	MDHash* f;
+	f = new SHA256(sha256Input, 64);
 	// Word *t4;
 	// Word *t5;
 	// Word *t6;
 
 	// printf("\n\n");
-	// // MDHash* f;
-	// int t1[32];
-	// int t2[32];
-	// int t3[32];
+	// MDHash* f;
+	int t1[32];
+	int t2[32];
+	int t3[32];
 
 	// f->newVars2({t1}, 32);
 	// f->newVars2({t2}, 32);
-	// f->newVars(t3, 32);
-	// printf("\n\n");
-	// f->fixedValue(t1, 213, 32);
-	// f->fixedValue(t2, 111, 32);
-	// f->fixedValue(t3, 222, 32);
-	// f->add2(t1, t2, t3, 32);
+	f->cnf.newVars((int *)&t1, 32);
+	f->cnf.newVars((int *)&t2, 32);
+	f->cnf.newVars((int *)t3, 32);
+	printf("\n\n");
+	f->cnf.fixedValue(t1, 213, 32);
+	f->cnf.fixedValue(t2, 111, 32);
+	f->cnf.fixedValue(t3, 222, 32);
+	f->cnf.add2(t1, t2, t3, 32);
 	// f->xor2(t1, t2, t3, 32);
 
-	// printf("%d\n", t1);
-	// f->rotr(t1, t2, 2, 32);
+	printf("%d\n", t1[1]);
+	f->cnf.rotl(t1, t2, 2, 32);
 
-	// printf("%d\n", t1);
-	// f->dimacs("out.dimacs");
+	printf("%d\n", t1[1]);
+	f->cnf.dimacs("out.dimacs");
 }
 
 // int main(int argc, char** argv)

@@ -66,11 +66,12 @@ public:
 	void setAdderType(AdderType type) { adderType = type; }
 	void setMultiAdderType(MultiAdderType type) { multiAdderType = type; }
 
+	void print(int* z);
 	void dimacs(string fileName = "", bool header = true); // Prints the current clause database in DIMACS format to 'fileName'. If 'fileName' is not given, prints to stdout
 
 	/* bitwise operations */
-	void rotl(int* z, int* x, int p, int n = 32); // Rotate left 'p' postitions
-	void rotr(int* z, int* x, int p, int n = 32) { rotl(z, x, n - p, n); } // Rotate right 'p' positions
+	void rotl(int* z, int* x, int p, int n = 8); // Rotate left 'p' postitions
+	void rotr(int* z, int* x, int p, int n = 8) { rotl(z, x, n - p, n); } // Rotate right 'p' positions
 	void assign(int* z, int* x, int n = 32) { rotl(z, x, 0, n); }
 	void and2(int* z, int* x, int* y, int n = 32); // Two-input AND
 	void or2(int* z, int* x, int* y, int n = 32); // Two-input OR

@@ -25,10 +25,9 @@ Formula::~Formula()
 void Formula::newVars(int* x, int n, string name)
 {
 	for (int i = 0; i < n; i++) {
-		printf("x\n");
-
+		// printf("x\n");
 		x[i] = ++varID;
-		printf("x\n");
+		// printf("x\n");
 		// if (debug) {
 		// printf("Newvar: varid: %d | x: %d | x[i]: %d \n", varID, *x, x[i]);
 		// }
@@ -95,10 +94,27 @@ void Formula::rotl(int* z, int* x, int p, int n)
 		printf("Rotate after: z[i]: %d ", z[i]);
 	}
 } else {
+	printf("z:");
+	print(z);
+	printf("x:");
+	print(x);
 	for (int i = 0; i < n; i++) {
 		z[i] = x[(i + n - p) % n];
 	}
+	printf("z:");
+	print(z);
+	printf("x:");
+	print(x);
 }
+}
+
+void Formula::print(int* z) {
+	printf("[");
+	for (int i = 0; i < 32; i++) {
+		printf("%d ", z[i]);
+	}
+	printf("]");
+	printf("\n");
 }
 
 void Formula::and2(int* z, int* x, int* y, int n)
